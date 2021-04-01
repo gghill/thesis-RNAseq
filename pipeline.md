@@ -111,6 +111,7 @@ sudo STAR --runThreadN 20 --runMode genomeGenerate \
 --sjdbGTFfile /data/ghi005/01_quantseq/03_useful-files/genomes/gadMor3.0_SIRV-genomic.gtf |& tee genome-gen-out.txt
 ```
 the output is a folder full of the components of the indexed genome, several GB in size
+
 ---
 ## Read alignment with STAR
 This took several rounds, the the most useful output being achieved after completely relaxing the alignment parameters to be more accomodating of short reads.
@@ -188,10 +189,10 @@ sudo STAR --runThreadN 30 --genomeDir /data/ghi005/01_quantseq/04_star-genomes/0
 
 done
 ```
-
 Nov 28 09:09:58 ..... started STAR run
 Nov 28 10:27:13 ..... finished successfully
 added --outFilterScoreMinOverLread 0 --outFilterMatchNminOverLread 0 --outFilterMatchNmin 0 \
 trying to match more of the "too short" reads
 Dec 01 12:44:28 ..... started STAR run (short optimized)
+
 ---
