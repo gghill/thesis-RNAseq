@@ -1,6 +1,21 @@
 # Pipeline from reads to gene ontology (GO) visualization
 substantially borrowed from [Filipe Figueiredo](https://github.com/famfigueiredo/QuantSeq-January2020/blob/e8c15f31ae051790842a2ed34b26cc331d69428e/README.md)
 
+## Table of Contents
+  [Demultiplexing with demuxFQ](#demultiplexing-with-demuxfq)
+  
+  [Adapter trimming with bbduk](#adapter-trimming-with-bbduk)
+  
+  [Genome indexing with STAR](#genome-indexing-with-star)
+  
+  [Read alignment with STAR](#read-alignment-with-star)
+  
+  [Differential Gene Expression](#differential-gene-expression)
+  
+  [Gene Ontology Annotation](#gene-ontology-annotation)
+   * [GO Visualization using simplifyEnrichment](#go-visualization-using-simplifyenrichment)
+
+
 ## Demultiplexing with demuxFQ
 
 24.11.20
