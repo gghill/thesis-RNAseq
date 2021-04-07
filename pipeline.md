@@ -198,7 +198,7 @@ Dec 01 12:44:28 ..... started STAR run (short optimized)
 ---
 ## Differential Gene Expression
 Gene ID outputs from htseq take several forms. Many genes include a "LOC" prefix as a placeholder until orthologs have been verified. LOC genes required conversion prior to database querying. More stable identifiers exist as lower case letters and digits such as "coq10b" and "pck1". These forms are ready for querying by most databases and do not require conversion.
-After signficantly differentially expressed genes are identified (see [DESeq2 markdown](../DESeq2.md)), they needed to be converted to a single format readable by a database, in this case the Maayan Lab [FishEnrichr](https://maayanlab.cloud/FishEnrichr/) database.
+After signficantly differentially expressed genes are identified (see [DESeq2 markdown](DESeq2.md)), they needed to be converted to a single format readable by a database, in this case the Maayan Lab [FishEnrichr](https://maayanlab.cloud/FishEnrichr/) database.
 Conversion was done using the NCBI eFetch Utility and the following script
 ```bash
 #!/bin/bash
