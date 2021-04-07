@@ -1,6 +1,8 @@
 # thesis-RNAseq
 Analysis of B. saida full transcriptome data from raw reads to gene ontology
 
+`Pipeline documentation in progress...[###  `   ` ` ` `  `  ]`
+
 Steps outlined in this repository:
 1. Demultiplexing
 2. QA/QC
