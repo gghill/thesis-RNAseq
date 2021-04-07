@@ -196,3 +196,86 @@ trying to match more of the "too short" reads
 Dec 01 12:44:28 ..... started STAR run (short optimized)
 
 ---
+## Differential Gene Expression
+Gene ID outputs from htseq take several forms. Many genes include a "LOC" prefix as a placeholder until orthologs have been verified. LOC genes required conversion prior to database querying. More stable identifiers exist as lower case letters and digits such as "coq10b" and "pck1". These forms are ready for querying by most databases and do not require conversion.
+After signficantly differentially expressed genes are identified (see [DESeq2 markdown](../)), they needed to be converted to a single format readable by a database, in this case the Maayan Lab [FishEnrichr](https://maayanlab.cloud/FishEnrichr/) database.
+Conversion was done using the NCBI eFetch Utility and the following script
+```bash
+#!/bin/bash
+STAMP="`date +'%FT%H%M'`"
+FILENAME="multi-query_$STAMP.txt"
+GENES="GENES_$FILENAME"
+sp="/-\|"
+sc=0
+spin() {
+   printf "\b${sp:sc++:1}"
+   ((sc==${#sp})) && sc=0
+}
+endspin() {
+   printf "\r%s\n" "$@"
+}
+cat next_batch.txt |
+while read line
+do
+	spin
+	if [[ ${line} =~ ^[a-zA-Z] ]]
+	then
+		echo "2." ${line} >> ./query_out/$FILENAME
+	else
+		efetch -db gene -id ${line} -format abstract >> ./query_out/$FILENAME
+	fi
+done
+grep '^[0-9][.] ' ./query_out/$FILENAME >> ./query_out/$GENES
+endspin
+```
+This script takes a set of genes with the "Loc-" or "gene-" prefix removed as an input in a file called next_batch.txt. LOC genes only contain numbers in this format and are fed into the eFetch gene db and the output in `-format abstract` is appended to an output file that is timestamped. Because this script would take 10 min. or more to run based on the number of input genes, there is also a status spinner so the user can see whether the query is still running after initiation. The output file includes unconverted genes preceded by "2." and converted genes with annotation preceded by "1."
+```
+1. prelid3b
+PRELI domain containing 3 [Gadus morhua (Atlantic cod)]
+Other Designations: PRELI domain containing protein 3B-like
+Chromosome: 13
+Annotation: Chromosome 13 NC_044060.1 (15022299..15027312)
+ID: 115557485
+
+2. atf3
+```
+The second output file created by the variable `$GENES` extracts just the gene names using the number and period at the beginning of the line to create a mostly clean gene list ready for database input.
+```
+2. sig_Tyr13_ordered_notrna_padj01
+1. LOC115561805
+2. b4galt7
+1. LOC115559985
+2. ppp1r10
+```
+In this example a name or identifier is included on the first line and maintained throughout. This list is then opened in excel using "." as a column delimiter to achieve clean lists for database input.
+
+---
+## Gene Ontology Annotation
+There are several useful outputs from the FishEnrichr query. Annotation along different categories (this analysis focuses on "Biological Process") is available in a graphic and table format:
+
+Bes17_finalish_padj01_GO_Biological_Process.png![image](https://user-images.githubusercontent.com/72388589/113826553-9669f080-9782-11eb-8544-5e6b80fb6486.png)
+
+Term |	GO_id |	Overlap |	P-value	Adjusted | P-value |	Old P-value |	Old Adjusted P-value |	Z-score |	Combined Score |	Genes |
+---|---|---|---|---|---|---|---|---|---|
+inactivation of MAPK activity | GO:0000188 |	"4/6" |	7.78E-05 |	0.026178448 |	0.000192527 |	0.040969749 |	-4.038103465 |	38.20526364 |	dusp1;dusp2;dusp4;dusp5
+hepatocyte differentiation |	GO:0070365 |	"3/6" |	0.002067377 |	0.183307423 |	0.00242818 |	0.123027786 |	-5.118114365 |	31.63749421 |	e2f8;apc;pck1
+sister chromatid segregation |	GO:0000819 |	"6/16" | 6.94E-05 |	0.026178448 |	5.23E-05 |	0.020870389 |	-3.167958402 |	30.33427221 |	top2a;ncapd2;ncaph;mis12;ncapg;kif18a 
+
+(table clipped for space, just an example)
+From this table, significant GO terms can be extracted based on metric of choice and relevant biological pathway clusters can be constructed.
+
+#### GO Visualization using simplifyEnrichment
+*this analysis is on different data than the table above because that data was visualized manually*
+```R
+library(simplifyEnrichment)
+library(magick)
+IsFj_GO = read.delim(".../IsFj_padj01_finalish_GO_Biological_Process.txt", header = T)
+go_sig = IsFj_GO[IsFj_GO$Adjusted.P.value<.05,]
+go_id = go_sig$GO_id
+mat = GO_similarity(go_id)
+system.time({df = simplifyGO(mat,fontsize_range = c(10,18),draw_word_cloud = T)})
+compare_clustering_methods(mat)
+write.csv(df, ".../IsFj_GO_df.csv")
+```
+
+![IsFj_GO_cluster1](https://user-images.githubusercontent.com/72388589/113827614-cb2a7780-9783-11eb-8cda-400e34249125.png)
