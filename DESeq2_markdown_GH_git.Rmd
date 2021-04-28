@@ -2,12 +2,14 @@
 title: "DESeq2 Analysis in R"
 author: "Griffin Hill"
 date: "4/28/2021"
-output: github_document
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
 active = "BesFj"
-setwd("/Users/Griffin/Documents/UiT/OneDrive - UiT Office 365/Master's proj/Bioinformatics/R_dir/Dseq2-DGE/")
+knitr::opts_knit$set(root.dir = "/Users/Griffin/Documents/UiT/OneDrive - UiT Office 365/Master's proj/Bioinformatics/R_dir/Dseq2-DGE/")
 directoryBes17Short = "./notrna/all"
 knitr::opts_chunk$set(fig.align = 'center')
 ```
