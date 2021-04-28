@@ -2,6 +2,7 @@
 Analysis of B. saida full transcriptome data from raw reads to gene ontology
 
 `Pipeline documentation in progress...[###  `   ` ` ` `  `  ]`
+`this is a line from R Studio`
 
 Steps outlined in this repository:
 1. Demultiplexing
