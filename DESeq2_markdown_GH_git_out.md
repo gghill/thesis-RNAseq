@@ -309,7 +309,8 @@ plotPCA.3d <- function (object, intgroup = "condition", ntop = 500, returnData =
 plotPCA.3d(normalizedBes17Short)
 ```
 
-![Besselfjord 3D PCA](Bess3d.png)
+![Besselfjord 3D
+PCA](./DESeq2_markdown_GH_git_out_files/figure-gfm/Bess3d.png)
 
 ## Results
 
@@ -435,7 +436,7 @@ mat = GO_similarity(go_id, ont = "BP")
 df = simplifyGO(mat, fontsize_range = c(10,18), min_term = 1, draw_word_cloud = T)
 ```
 
-    ## Cluster 7 terms by 'binary_cut'... 3 clusters, used 0.03349113 secs.
+    ## Cluster 7 terms by 'binary_cut'... 3 clusters, used 0.02066708 secs.
 
 <img src="DESeq2_markdown_GH_git_out_files/figure-gfm/GO vis-1.png" style="display: block; margin: auto;" />
 Depending on the number of GO terms and clusters, the default plotting
