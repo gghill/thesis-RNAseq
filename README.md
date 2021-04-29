@@ -15,4 +15,4 @@ Steps outlined in this repository:
    * annotation of biological processes and assignment of gene ontologies using FishEnrichr
    * visualization of GO pathways using simplifyEnrichment 
 
-Steps 1-5 can be found in the [pipeline](pipeline.md) while DGE is documented [here](DESeq_2markdown_GH_git_out.md)
+Steps 1-5 can be found in the [pipeline](pipeline.md) while DGE is documented in the [DESeq2 markdown](DESeq2_markdown_GH_git_out.md)
