@@ -1,11 +1,11 @@
 ---
 title: "DESeq2 Analysis in R"
 author: "Griffin Hill"
-date: "4/28/2021"
+date: "4/29/2021"
 output: 
   github_document:
     toc: true
-    toc_depth: 2
+    toc_depth: 1
 ---
 ```{r setup, include=FALSE}
 active = "BesFj"

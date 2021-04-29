@@ -1,7 +1,7 @@
 DESeq2 Analysis in R
 ================
 Griffin Hill
-4/28/2021
+4/29/2021
 
 #### A representative example of fjord-offshore differential gene expression (DGE) analysis in Polar cod (*Boreogadus saida*) using DESeq2
 
@@ -435,7 +435,7 @@ mat = GO_similarity(go_id, ont = "BP")
 df = simplifyGO(mat, fontsize_range = c(10,18), min_term = 1, draw_word_cloud = T)
 ```
 
-    ## Cluster 7 terms by 'binary_cut'... 3 clusters, used 0.01858091 secs.
+    ## Cluster 7 terms by 'binary_cut'... 3 clusters, used 0.03349113 secs.
 
 <img src="DESeq2_markdown_GH_git_out_files/figure-gfm/GO vis-1.png" style="display: block; margin: auto;" />
 Depending on the number of GO terms and clusters, the default plotting
