@@ -1,11 +1,13 @@
-fish\_condition
+Statistical Analysis of Fish Condition
 ================
 Griffin Hill
 5/7/2021
 
 #### Verification of sample inter-comparability for downstream RNA-seq comparisons
 
-This notebook seeks to verify
+This notebook seeks to verify the validity of comparisons of *Boreogadus
+saida* samples from fjord and offshore locations around the Greenland
+Sea.
 
 ## Setup
 
@@ -106,3 +108,52 @@ Now, it makes sense to explore the relationship between length and
 weight in the sampled fish a bit more. This is our first inkling of
 actual condition of the organism, which of course we’d like to be fairly
 uniform across individuals used in the study.
+
+``` r
+no_log_fish <- f + geom_point(aes(color = location))  +
+  geom_smooth(method='lm',formula=y ~ x) +
+  theme(legend.position = "bottom") +
+  labs(x="length (mm)", y="weight (g)") +
+  ggtitle("length weight relationship") +
+  ax_theme
+no_log_fish
+```
+
+<img src="fish_stats_markdown_files/figure-gfm/raw length weight-1.png" style="display: block; margin: auto;" />
+It is apparent that this may not be the best fit as the regression is
+linear and the data appears to be slightly curved. We can assess the fit
+using the residuals with the goal being no pattern in the residuals
+vs. fitted plot and similar variance over the whole range of the data.
+
+``` r
+par(mfrow=c(2,2))
+plot(lm(all_fish$weight ~ all_fish$length, all_fish))
+```
+
+<img src="fish_stats_markdown_files/figure-gfm/no log resid-1.png" style="display: block; margin: auto;" />
+Obviously our residuals have some shape and there may be a better way to
+fit a model to this data. Based on the assumption of homogeneity of
+variance over the entire sampled population, we can justify a log10
+transformation of the
+data.
+
+``` r
+log_fish <- ggplot(all_fish,aes(x=log10(length),y=log10(weight),location)) + geom_point(aes(color=location)) +
+  geom_smooth(method = 'lm',formula=y~x) +
+  theme(legend.position = 'bottom') +
+  labs(x="log10(length (mm))", y="log10(weight (g))") +
+  ggtitle("log10 transformed length weight relationship") +
+  ax_theme
+log_fish
+```
+
+<img src="fish_stats_markdown_files/figure-gfm/log transform-1.png" style="display: block; margin: auto;" />
+This looks like a much better fit, but we can verify with the residual
+plot again.
+
+``` r
+par(mfrow=c(2,2))
+plot(lm(log10(all_fish$weight) ~ log10(all_fish$length),all_fish))
+```
+
+<img src="fish_stats_markdown_files/figure-gfm/log residuals-1.png" style="display: block; margin: auto;" />
