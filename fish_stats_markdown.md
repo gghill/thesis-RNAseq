@@ -157,3 +157,38 @@ plot(lm(log10(all_fish$weight) ~ log10(all_fish$length),all_fish))
 ```
 
 <img src="fish_stats_markdown_files/figure-gfm/log residuals-1.png" style="display: block; margin: auto;" />
+Residuals look good as well, so now we can use this log transformation
+going forward and break down our visualization by location.
+
+``` r
+log_lw_overview <- function(loc){
+  ggplot(data=subset(all_fish, location == loc),aes(x = log10(length), y = log10(weight))) + 
+    geom_point() +
+    geom_smooth(method = 'lm',formula = y~x) +
+    scale_y_continuous(limits = c(.5,2)) + # can comment out to scale or unscale
+    scale_x_continuous(limits = c(2,2.4)) + # can comment out to scale or unscale, could modify function to take a preference
+    labs(x="log10(length (mm))", y="log10(weight (g))") +
+    ggtitle(paste0(loc)) +
+    ax_theme
+}
+big_picture_list <- lapply(ordered_locs, log_lw_overview)
+plot_grid(plotlist = big_picture_list,nrow = 3)
+```
+
+    ## Warning: Removed 1 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 1 rows containing missing values (geom_point).
+
+    ## Warning: Removed 1 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 1 rows containing missing values (geom_point).
+
+    ## Warning: Removed 3 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 3 rows containing missing values (geom_point).
+
+    ## Warning: Removed 1 rows containing non-finite values (stat_smooth).
+
+    ## Warning: Removed 1 rows containing missing values (geom_point).
+
+<img src="fish_stats_markdown_files/figure-gfm/all logged-1.png" style="display: block; margin: auto;" />
