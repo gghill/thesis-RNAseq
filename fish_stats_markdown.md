@@ -56,7 +56,8 @@ and weight, as well as a calculated Fulton K condition index.
 ``` r
 all_fish = read.delim('./allfish_vis_ID.txt', header = T, dec = ',')
 names(all_fish) = c("Fish_ID","GH_ID","location","length","weight","FultonK")
-all_fish[all_fish=="Bessel_Shelf"] <- "Bessel Offshore" # more human legible
+# more human legible names
+all_fish[all_fish=="Bessel_Shelf"] <- "Bessel Offshore" 
 all_fish[all_fish=="Shelf-N"] <- "North Shelf (Offshore)"
 all_fish[all_fish=="Hoch"] <- "Hochsetter (Offshore)"
 all_fish[all_fish=="Tyroler"] <- "Tyrolerfjord"
@@ -114,6 +115,7 @@ plot_grid(plotlist = histo_list,nrow = 3)
 ```
 
 <img src="fish_stats_markdown_files/figure-gfm/length histos-1.png" style="display: block; margin: auto;" />
+
 This approach combined with `lapply` and `plot_grid` allows for the
 creation of ready made figures with grids of plots. A custom theme
 profile and specific ordering of the locations provides figures with
@@ -121,7 +123,9 @@ legible labels and conveniently organizes the columns of the resulting
 figure by location type (fjord on the left, offshore on the right).
 
 This kind of count based visualization can also be achieved on a single
-figure via grouping, but is more difficult to decipher.
+figure via grouping, but is more difficult to
+decipher.
+
 <img src="fish_stats_markdown_files/figure-gfm/unnamed-chunk-1-1.png" style="display: block; margin: auto;" />
 
 ## Length vs. weight relationship
@@ -188,7 +192,7 @@ log_lw_overview <- function(loc){
     geom_point() +
     geom_smooth(method = 'lm',formula = y~x) +
     scale_y_continuous(limits = c(.5,2)) + # can comment out to scale or unscale
-    scale_x_continuous(limits = c(2,2.4)) + # can comment out to scale or unscale, could modify function to take a preference
+    scale_x_continuous(limits = c(2,2.4)) + # can comment out to scale or unscale
     labs(x="log10(length (mm))", y="log10(weight (g))") +
     ggtitle(paste0(loc)) +
     ax_theme
@@ -198,6 +202,7 @@ plot_grid(plotlist = big_picture_list,nrow = 3)
 ```
 
 <img src="fish_stats_markdown_files/figure-gfm/all logged-1.png" style="display: block; margin: auto;" />
+
 Scaling the axes in this plot allows for a better sense of the range of
 values each location covers. We can see that different sites host a
 different range of lengths, but all seem to fit our regression line
@@ -263,8 +268,56 @@ plot_grid(slope_vis,all_K,nrow=2,rel_heights = c(1,1.25))
 Here we can see visually that the confidence intervals appear to largely
 overlap, especially those belonging to a fjord-offshore pairing, based
 on both parameters. This suggests the locations are not significantly
-different and indeed comparable. However, we are only looking at one
-dimension at a time (slope or K), what happens if these are combined?
+different and indeed comparable.
+
+Now that we’re thoroughly satisfied with that linear model output, we
+can create a more detailed table that captures a complete description of
+the model and its
+outputs.
+
+``` r
+# list of function outputs that generates useful linear regression parameters for each location.
+lm_out<-lapply((ordered_locs), function(z) { # log linear models
+  data.frame(location=z, 
+             n = count(subset(all_fish,all_fish$location==z)),
+             log_intercept = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['coefficients'][[1]][[2]],
+             slope = coef(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))[2],
+             std_error = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['coefficients'][[1]][[4]],
+             r_squared = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['adj.r.squared'],
+             f_value = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['fstatistic'][[1]][[1]],
+             Pr_fvalue = anova(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))[1,5],
+             row.names=NULL)
+}
+)
+
+lm_table = do.call(rbind,lm_out)
+
+# use fixp() function to make p values human legible
+lm_table = fixp(lm_table)
+lm_table
+```
+
+    ##                 location  n log_intercept    slope  std_error adj.r.squared
+    ## 1            Besselfjord 27      2.855054 2.855054 0.13438854     0.9454172
+    ## 2        Bessel Offshore 26      2.986493 2.986493 0.08785616     0.9788050
+    ## 3           Tyrolerfjord 30      3.146002 3.146002 0.09963650     0.9717064
+    ## 4  Hochsetter (Offshore) 28      2.903567 2.903567 0.07786668     0.9809385
+    ## 5                Isfjord 16      2.994526 2.994526 0.22427556     0.9268072
+    ## 6 North Shelf (Offshore) 31      2.772301 2.772301 0.07159432     0.9803719
+    ##     f_value Pr_fvalue
+    ## 1  451.3403    < .001
+    ## 2 1155.5227    < .001
+    ## 3  996.9678    < .001
+    ## 4 1390.4655    < .001
+    ## 5  178.2757    < .001
+    ## 6 1499.4211    < .001
+
+This table can be easily exported as a .csv for use in a written work
+using a command such as `write.table()`
+
+However, we’ve so far only looked at one approximation of the
+individual’s condition at a time (slope or K), what happens if these
+are combined?
 
 ``` r
 # remove one row with NA values
@@ -308,49 +361,104 @@ slope_K
 <img src="fish_stats_markdown_files/figure-gfm/slope and K-1.png" style="display: block; margin: auto;" />
 From this we can see that there appears to be a lot more variability in
 terms of mean Fulton’s K, even if we rescaled the y axis, some of the
-confidence intervals wouldn’t overlap.
+confidence intervals wouldn’t overlap. There’s a more quantitative
+approach we can take than visual comparison at this stage.
 
-Now that we’re thoroughly satisfied with that linear model output, we
-can create a more detailed table that captures a complete description of
-the model and its
-outputs.
+## Analysis of Variance (ANOVA) of Fulton’s K condition factor
+
+First, we need to fit an analysis of variance model to the linear models
+for each location. Fortunately, R does this on its own using the `aov()`
+function. ANOVA assumptions: *Independence of the observations. *Each
+subject should belong to only one group. *No significant outliers in any
+cell of the design. *Normality. the data for each design cell should be
+approximately normally distributed. \*Homogeneity of variances.
+
+Based on the trawl based sampling regime, we can assume the observations
+are independent and that each belongs to only one group. While some
+outliers have emerged for individual sites, they fall within the normal
+range of the whole population across sites, so it is reasonable to
+assume that they do not significantly influence the results. Using our
+initial histograms we can assume that the collection at each location is
+roughly normal. The residuals from the log transformed data allow us to
+assume homogeneity of variance.
 
 ``` r
-# list of function outputs that generates useful linear regression parameters for each location.
-lm_out<-lapply((ordered_locs), function(z) { # log linear models
-  data.frame(location=z, 
-             n = count(subset(all_fish,all_fish$location==z)),
-             log_intercept = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['coefficients'][[1]][[2]],
-             slope = coef(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))[2],
-             std_error = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['coefficients'][[1]][[4]],
-             r_squared = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['adj.r.squared'],
-             f_value = summary(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))['fstatistic'][[1]][[1]],
-             Pr_fvalue = anova(lm(log10(weight)~log10(length), data=all_fish[all_fish$location==z,]))[1,5],
-             row.names=NULL)
-}
-)
-
-lm_table = do.call(rbind,lm_out)
-
-# use fixp() function to make p values human legible
-lm_table = fixp(lm_table)
-lm_table
+aov_K_loc = aov(FultonK ~ location, data = all_fish)
+summary(aov_K_loc)
 ```
 
-    ##                 location  n log_intercept    slope  std_error adj.r.squared
-    ## 1            Besselfjord 27      2.855054 2.855054 0.13438854     0.9454172
-    ## 2        Bessel Offshore 26      2.986493 2.986493 0.08785616     0.9788050
-    ## 3           Tyrolerfjord 26      3.145234 3.145234 0.12425410     0.9623915
-    ## 4  Hochsetter (Offshore) 25      2.909816 2.909816 0.08275071     0.9809445
-    ## 5                Isfjord 15      2.994526 2.994526 0.22427556     0.9268072
-    ## 6 North Shelf (Offshore) 27      2.794927 2.794927 0.08298389     0.9775740
-    ##     f_value Pr_fvalue
-    ## 1  451.3403    < .001
-    ## 2 1155.5227    < .001
-    ## 3  640.7440    < .001
-    ## 4 1236.4816    < .001
-    ## 5  178.2757    < .001
-    ## 6 1134.3666    < .001
+    ##              Df Sum Sq Mean Sq F value   Pr(>F)    
+    ## location      5 0.3410 0.06821    18.1 8.03e-14 ***
+    ## Residuals   140 0.5277 0.00377                     
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 11 observations deleted due to missingness
 
-This table can be easily exported as a .csv for use in a written work
-using a command such as `write.table()`
+With that highly significant p-value, we can conclude that some of the
+Fulton’s K condition factors by location are different, but which ones?
+For that, we need a test of significant differences. Since we are doing
+pairwise comparisons, Tukey’s test for Honest Significant Differences
+(HSD) is a good fit.
+
+``` r
+tuk_K_loc = TukeyHSD(aov_K_loc)
+head(tuk_K_loc)
+```
+
+    ## $location
+    ##                                                     diff          lwr
+    ## Besselfjord-Bessel Offshore                   0.04414530 -0.004599095
+    ## Hochsetter (Offshore)-Bessel Offshore         0.08712308  0.037431394
+    ## Isfjord-Bessel Offshore                       0.09725641  0.039736934
+    ## North Shelf (Offshore)-Bessel Offshore        0.01007123 -0.038673169
+    ## Tyrolerfjord-Bessel Offshore                  0.13192308  0.082720979
+    ## Hochsetter (Offshore)-Besselfjord             0.04297778 -0.006260752
+    ## Isfjord-Besselfjord                           0.05311111 -0.004017337
+    ## North Shelf (Offshore)-Besselfjord           -0.03407407 -0.082356425
+    ## Tyrolerfjord-Besselfjord                      0.08777778  0.039033384
+    ## Isfjord-Hochsetter (Offshore)                 0.01013333 -0.047805488
+    ## North Shelf (Offshore)-Hochsetter (Offshore) -0.07705185 -0.126290382
+    ## Tyrolerfjord-Hochsetter (Offshore)            0.04480000 -0.004891683
+    ## North Shelf (Offshore)-Isfjord               -0.08718519 -0.144313634
+    ## Tyrolerfjord-Isfjord                          0.03466667 -0.022852809
+    ## Tyrolerfjord-North Shelf (Offshore)           0.12185185  0.073107458
+    ##                                                      upr        p adj
+    ## Besselfjord-Bessel Offshore                   0.09288969 9.995657e-02
+    ## Hochsetter (Offshore)-Bessel Offshore         0.13681476 1.845678e-05
+    ## Isfjord-Bessel Offshore                       0.15477589 4.047485e-05
+    ## North Shelf (Offshore)-Bessel Offshore        0.05881562 9.910896e-01
+    ## Tyrolerfjord-Bessel Offshore                  0.18112517 2.583500e-11
+    ## Hochsetter (Offshore)-Besselfjord             0.09221631 1.247237e-01
+    ## Isfjord-Besselfjord                           0.11023956 8.444251e-02
+    ## North Shelf (Offshore)-Besselfjord            0.01420828 3.257007e-01
+    ## Tyrolerfjord-Besselfjord                      0.13652217 1.002598e-05
+    ## Isfjord-Hochsetter (Offshore)                 0.06807215 9.959013e-01
+    ## North Shelf (Offshore)-Hochsetter (Offshore) -0.02781332 1.856292e-04
+    ## Tyrolerfjord-Hochsetter (Offshore)            0.09449168 1.028115e-01
+    ## North Shelf (Offshore)-Isfjord               -0.03005674 2.913951e-04
+    ## Tyrolerfjord-Isfjord                          0.09218614 5.069206e-01
+    ## Tyrolerfjord-North Shelf (Offshore)           0.17059625 4.451879e-10
+
+``` r
+gg_tuk = as.data.frame(tuk_K_loc$location)
+
+# pick out pairings of interest to this study
+interest = c("Besselfjord-Bessel Offshore", "Tyrolerfjord-Hochsetter (Offshore", "North Shelf (Offshore)-Isfjord")
+gg_tuk = gg_tuk[interest,]
+gg_tuk$pair = rownames(gg_tuk)
+
+
+# plot pairwise TukeyHSD comparisons and color by significance level
+ggplot(gg_tuk, aes(colour=cut(`p adj`, c(0, 0.01, 0.05, 1),
+                           label=c("p<0.01","p<0.05","Non-Sig")))) +
+  geom_hline(yintercept=0, lty="11", colour="grey30") +
+  geom_errorbar(aes(pair, ymin=lwr, ymax=upr), width=0.2) +
+  geom_point(aes(pair, diff)) +
+  labs(colour="",x="Location pairing", y="Difference in modeled Fulton K value") +
+  ggtitle("Fulton K Tukey HSD by location") +
+  ax_theme +
+  theme(legend.text  = element_text(size = 14)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+<img src="fish_stats_markdown_files/figure-gfm/Tukey HSD-1.png" style="display: block; margin: auto;" />
