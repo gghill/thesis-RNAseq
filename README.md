@@ -14,4 +14,4 @@ Steps outlined in this repository:
    * annotation of biological processes and assignment of gene ontologies using FishEnrichr
    * visualization of GO pathways using simplifyEnrichment 
 
-Steps 1-5 can be found in the [pipeline](pipeline.md), while inter-comparability verification is carried out in R (version 4.0.3 (2020-10-10)) through the approach described in [fish stats](fish_stats_markdown.md) and DGE is documented in the [DESeq2 markdown](DESeq2-markdown.md).
+Steps 1-5 can be found in the [pipeline](pipeline.md), while inter-comparability verification is carried out in R (version 4.0.3 (2020-10-10)) through the approach described in [fish stats](fish_stats_markdown.md) and DGE is documented in the [DESeq2 markdown](DESeq2-markdown.md). For additional reading, including a deeper discussion of these analyses, check out my MSc. [thesis](https://hdl.handle.net/10037/21751).
